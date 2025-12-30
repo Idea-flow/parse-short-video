@@ -410,6 +410,7 @@
             };
 
             const data = computed(() => {
+                addLog("解析结果更新data:"+JSON.stringify(result.value));
                 return result.value ? result.value.data : null;
             });
 
@@ -449,6 +450,23 @@
                     const json = await response.json();
 
                     if (json.code === 200) {
+                        // 转换字段名：camelCase -> snake_case
+                        if (json.data) {
+                            if (json.data.coverUrl) {
+                                json.data.cover_url = json.data.coverUrl;
+                                delete json.data.coverUrl;
+                            }
+                            if (json.data.musicUrl) {
+                                json.data.music_url = json.data.musicUrl;
+                                delete json.data.musicUrl;
+                            }
+                            if (json.data.videoUrl) {
+                                json.data.video_url = json.data.videoUrl;
+                                delete json.data.videoUrl;
+                            }
+                        }
+                        // console.log("接口解析结果:"+JSON.stringify(json))
+                        // addLog("接口解析结果:"+JSON.stringify(json))
                         result.value = json;
                     } else {
                         throw new Error(json.msg || '解析失败，未知错误');
