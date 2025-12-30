@@ -38,6 +38,10 @@ chmod +x mvnw
 ### 步骤 4: 访问服务
 打开浏览器访问：http://localhost:40200
 
+**测试 Thymeleaf 是否正常:**
+- 访问测试页面: http://localhost:40200/test
+- 如果能看到"✅ Thymeleaf 工作正常"，说明配置成功
+
 ---
 
 ## 📝 API 测试

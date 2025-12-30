@@ -160,16 +160,16 @@
 
     <div class="flex flex-col sm:flex-row gap-3">
         <input
-                v-model="inputUrl"
-                type="text"
-                placeholder="粘贴分享链接~"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                @keyup.enter="handleParse"
+            v-model="inputUrl"
+            type="text"
+            placeholder="粘贴分享链接~"
+            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            @keyup.enter="handleParse"
         >
         <button
-                @click="handleParse"
-                :disabled="loading"
-                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6 py-2"
+            @click="handleParse"
+            :disabled="loading"
+            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6 py-2"
         >
             <i v-if="loading" class="ph ph-spinner animate-spin mr-2"></i>
             <span v-else class="mr-2"><i class="ph ph-magic-wand"></i></span>
@@ -246,17 +246,17 @@
 
                         <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3 backdrop-blur-[2px]">
                             <button
-                                    v-if="!img.live_photo_url"
-                                    @click="downloadFile(img.url, `image_${index}_${generateFileName()}`)"
-                                    class="bg-white text-black px-4 py-2 rounded-full text-xs font-medium hover:scale-105 transition-transform flex items-center gap-2"
+                                v-if="!img.live_photo_url"
+                                @click="downloadFile(img.url, `image_${index}_${generateFileName()}`)"
+                                class="bg-white text-black px-4 py-2 rounded-full text-xs font-medium hover:scale-105 transition-transform flex items-center gap-2"
                             >
                                 <i class="ph ph-download-simple"></i> 下载图片
                             </button>
 
                             <div v-else class="flex flex-col gap-2">
                                 <button
-                                        @click="downloadLivePhoto(img.url, img.live_photo_url, index)"
-                                        class="bg-white text-black px-4 py-2 rounded-full text-xs font-medium hover:scale-105 transition-transform flex items-center gap-2"
+                                    @click="downloadLivePhoto(img.url, img.live_photo_url, index)"
+                                    class="bg-white text-black px-4 py-2 rounded-full text-xs font-medium hover:scale-105 transition-transform flex items-center gap-2"
                                 >
                                     <i class="ph ph-aperture"></i> 下载实况
                                 </button>
@@ -578,7 +578,6 @@
             if (urlParams.has('showLog')) {
                 const val = urlParams.get('showLog');
                 showLogs.value = val === 'true' || val === '1';
-                console.log(`showLogs: ${showLogs.value}`)
             }
 
             return {
