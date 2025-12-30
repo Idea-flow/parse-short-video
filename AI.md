@@ -7,6 +7,7 @@
 ## 使用技术规范
  http客户端:org.springframework.web.client.RestClient
  lombok
+
 ## 完成功能
 ### 参考项目-本地项目地址
   这是一个python项目,需要转为springboot项目,项目需要结构清晰,易于维护.
@@ -14,6 +15,9 @@
 
   解析器模块文件夹:/Users/wangpenglong/projects/java/parse-short-video/parse-video-py-main-my/parser
   只需要完成抖音,小红书的解析即可
+
+## 其他额外要求
+ 我是一个初学者,请在代码中添加详细注释,方便我学习.
 
 
 

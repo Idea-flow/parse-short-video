@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+     <!-- 添加 favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <title>视频/图集去水印解析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "uqdu9n049r");
+    </script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        card: {
+                            DEFAULT: "hsl(var(--card))",
+                            foreground: "hsl(var(--card-foreground))",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "var(--radius)",
+                        md: "calc(var(--radius) - 2px)",
+                        sm: "calc(var(--radius) - 4px)",
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 240 10% 3.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 240 10% 3.9%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 240 10% 3.9%;
+            --primary: 240 5.9% 10%;
+            --primary-foreground: 0 0% 98%;
+            --secondary: 240 4.8% 95.9%;
+            --secondary-foreground: 240 5.9% 10%;
+            --muted: 240 4.8% 95.9%;
+            --muted-foreground: 240 3.8% 46.1%;
+            --accent: 240 4.8% 95.9%;
+            --accent-foreground: 240 5.9% 10%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 0 0% 98%;
+            --border: 240 5.9% 90%;
+            --input: 240 5.9% 90%;
+            --ring: 240 10% 3.9%;
+            --radius: 0.5rem;
+        }
+
+        .dark {
+            --background: 240 10% 3.9%;
+            --foreground: 0 0% 98%;
+            --card: 240 10% 3.9%;
+            --card-foreground: 0 0% 98%;
+            --popover: 240 10% 3.9%;
+            --popover-foreground: 0 0% 98%;
+            --primary: 0 0% 98%;
+            --primary-foreground: 240 5.9% 10%;
+            --secondary: 240 3.7% 15.3%;
+            --secondary-foreground: 0 0% 98%;
+            --muted: 240 3.7% 15.3%;
+            --muted-foreground: 240 5% 64.9%;
+            --accent: 240 3.7% 15.3%;
+            --accent-foreground: 0 0% 98%;
+            --destructive: 0 62.8% 30.6%;
+            --destructive-foreground: 0 0% 98%;
+            --border: 240 3.7% 15.9%;
+            --input: 240 3.7% 15.9%;
+            --ring: 240 4.9% 83.9%;
+        }
+
+        body {
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        ::view-transition-old(root),
+        ::view-transition-new(root) {
+            animation: none;
+            mix-blend-mode: normal;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col items-center py-10 px-4 transition-colors duration-300">
+
+<div id="app" class="w-full max-w-3xl space-y-8">
+
+    <div class="flex justify-between items-center w-full">
+        <div class="space-y-1">
+            <h1 class="text-2xl font-bold tracking-tight">媒体无水印解析</h1>
+            <p class="text-sm text-muted-foreground">支持抖音、小红书等常见媒体 无水印 视频/图集/实况解析</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button @click="showHelp = true" class="p-2 rounded-md hover:bg-secondary transition-colors border border-border" title="使用说明">
+                <i class="ph ph-question text-xl"></i>
+            </button>
+{#            <button v-if="showLogs" @click="showLogs = !showLogs" class="p-2 rounded-md hover:bg-secondary transition-colors border border-border" :class="{ 'bg-secondary': showLogs }" title="显示日志">#}
+{#                <i class="ph ph-terminal-window text-xl"></i>#}
+{#            </button>#}
+            <button @click="toggleTheme" class="p-2 rounded-md hover:bg-secondary transition-colors border border-border">
+                <i v-if="isDark" class="ph ph-sun text-xl"></i>
+                <i v-else class="ph ph-moon text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-3">
+        <input
+            v-model="inputUrl"
+            type="text"
+            placeholder="粘贴分享链接~"
+            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            @keyup.enter="handleParse"
+        >
+        <button
+            @click="handleParse"
+            :disabled="loading"
+            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6 py-2"
+        >
+            <i v-if="loading" class="ph ph-spinner animate-spin mr-2"></i>
+            <span v-else class="mr-2"><i class="ph ph-magic-wand"></i></span>
+            解析
+        </button>
+    </div>
+
+    <div v-if="error" class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg text-sm flex items-center gap-2 border border-red-200 dark:border-red-900">
+        <i class="ph ph-warning-circle text-lg"></i>
+        [[ error ]]
+    </div>
+
+    <div v-if="data" class="space-y-6 animate-fade-in-up">
+
+        <div v-if="data.author" class="flex items-center gap-4 p-4 rounded-lg border border-border bg-card shadow-sm">
+            <div class="relative w-12 h-12">
+                <img :src="data.author.avatar" alt="Avatar" class="w-full h-full object-cover rounded-full border border-border">
+            </div>
+            <div class="flex-1 min-w-0">
+                <h3 class="font-semibold text-lg truncate">[[ data.author.name ]]</h3>
+                <p class="text-xs text-muted-foreground font-mono">UID: [[ data.author.uid ]]</p>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <h2 v-if="data.title" class="text-xl font-bold leading-tight">[[ data.title ]]</h2>
+
+            <div v-if="data.cover_url" class="group relative rounded-xl overflow-hidden border border-border bg-muted max-w-full shadow-sm flex items-center justify-center">
+                <img :src="data.cover_url" class="max-w-full max-h-[400px] object-contain" alt="Cover">
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                    <button @click="downloadFile(data.cover_url, 'cover_' + generateFileName())" class="bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:scale-105 transition-transform flex items-center gap-2">
+                        <i class="ph ph-download-simple"></i> 下载封面
+                    </button>
+                </div>
+                <div class="absolute bottom-2 left-2 px-2 py-1 bg-black/60 text-white text-xs rounded backdrop-blur-md">
+                    封面预览
+                </div>
+            </div>
+        </div>
+
+        <div v-if="data.video_url" class="space-y-2">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="ph ph-film-strip text-primary"></i>
+                <h3 class="font-semibold text-sm">视频内容</h3>
+            </div>
+            <div class="group relative rounded-xl overflow-hidden border border-border bg-black shadow-md">
+                <video controls class="w-full max-h-[600px] mx-auto">
+                    <source :src="data.video_url" type="video/mp4">
+                    您的浏览器不支持 Video 标签。
+                </video>
+                <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button @click="downloadFile(data.video_url, 'video_' + generateFileName() + '.mp4')" class="bg-primary text-primary-foreground p-3 rounded-full shadow-lg hover:bg-primary/90 transition-transform hover:scale-110">
+                        <i class="ph ph-download-simple text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="data.images && data.images.length > 0" class="space-y-2">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="ph ph-images text-primary"></i>
+                <h3 class="font-semibold text-sm">
+                    [[ hasLivePhoto ? '实况图集 (Live Photo)' : '高清图集' ]]
+                </h3>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div v-for="(img, index) in data.images" :key="index" class="group relative break-inside-avoid">
+                    <div class="relative rounded-lg overflow-hidden border border-border bg-muted shadow-sm aspect-[3/4]">
+                        <div v-if="img.live_photo_url" class="w-full h-full">
+                            <video autoplay muted playsinline loop :src="img.live_photo_url" class="w-full h-full object-cover"></video>
+                        </div>
+                        <img v-else :src="img.url" class="w-full h-full object-cover" loading="lazy">
+
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3 backdrop-blur-[2px]">
+                            <button
+                                v-if="!img.live_photo_url"
+                                @click="downloadFile(img.url, `image_${index}_${generateFileName()}`)"
+                                class="bg-white text-black px-4 py-2 rounded-full text-xs font-medium hover:scale-105 transition-transform flex items-center gap-2"
+                            >
+                                <i class="ph ph-download-simple"></i> 下载图片
+                            </button>
+
+                            <div v-else class="flex flex-col gap-2">
+                                <button
+                                    @click="downloadLivePhoto(img.url, img.live_photo_url, index)"
+                                    class="bg-white text-black px-4 py-2 rounded-full text-xs font-medium hover:scale-105 transition-transform flex items-center gap-2"
+                                >
+                                    <i class="ph ph-aperture"></i> 下载实况
+                                </button>
+                            </div>
+                        </div>
+
+                        <div v-if="img.live_photo_url" class="absolute top-2 left-2 px-2 py-1 bg-white/90 text-black text-[10px] font-bold rounded-md flex items-center gap-1">
+                            <i class="ph ph-record-fill text-red-500"></i> LIVE
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div v-else-if="!loading && !error" class="text-center py-20 text-muted-foreground opacity-50">
+        <i class="ph ph-magic-wand text-6xl mb-4 block mx-auto"></i>
+        <p>输入链接开始解析</p>
+    </div>
+
+    <!-- Help Modal -->
+    <div v-if="showHelp" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" style="display: none;" :style="{ display: showHelp ? 'flex' : 'none' }">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" @click="showHelp = false"></div>
+        <div class="relative w-full max-w-lg transform rounded-xl bg-card p-6 text-left shadow-xl transition-all border border-border animate-fade-in-up">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold leading-6">使用说明</h3>
+                <button @click="showHelp = false" class="rounded-md p-1 hover:bg-secondary transition-colors">
+                    <i class="ph ph-x text-lg"></i>
+                </button>
+            </div>
+            <div class="space-y-4 text-sm text-muted-foreground">
+                <p><strong>目前支持: </strong>抖音/火山/微视/最右/快手/皮皮搞笑/梨视频/西瓜/微博/虎牙/绿洲/好看/逗拍/美拍/新片场/全民K歌</p>
+                <div class="bg-secondary/50 p-3 rounded-lg border border-border/50">
+                    <p class="mb-2"><strong>温馨提示: </strong></p>
+                    <p class="mb-1">1. 粘贴视频地址时<u>无需删除文案</u><small class="text-muted-foreground/80"> 但如果视频链接正确但解析失败请删掉文案后重试</small></p>
+{#                    <p>2. 点击下载视频跳转时, 可能会被对应网站识别, 报 <u>403 Forbidden</u>, 可以在 下载视频 按钮, 右键复制链接地址, 新开浏览器标签页打开即可</p>#}
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button @click="showHelp = false" class="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                    我知道了
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Progress Modal -->
+    <div v-if="downloading" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-opacity">
+        <div class="bg-card text-card-foreground p-6 rounded-xl shadow-xl border border-border w-full max-w-xs animate-fade-in-up">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-sm">正在下载视频</h3>
+                <span class="text-xs text-muted-foreground">[[ downloadProgress ]]%</span>
+            </div>
+            <div class="w-full bg-secondary rounded-full h-2 overflow-hidden">
+                <div class="bg-primary h-full rounded-full transition-all duration-200 ease-out" :style="{ width: downloadProgress + '%' }"></div>
+            </div>
+            <p class="text-xs text-muted-foreground mt-3 text-center">请勿关闭页面</p>
+        </div>
+    </div>
+
+    <!-- Log Console -->
+    <div v-if="showLogs" class="fixed bottom-4 right-4 w-80 max-h-60 overflow-y-auto bg-black/90 text-green-400 p-4 rounded-lg text-xs font-mono shadow-xl z-50 border border-green-900 backdrop-blur-sm">
+        <div class="flex justify-between items-center mb-2 border-b border-green-800 pb-1 sticky top-0 bg-black/90">
+            <span class="font-bold">运行日志</span>
+            <button @click="logs = []" class="hover:text-white"><i class="ph ph-trash"></i></button>
+        </div>
+        <div v-for="(log, index) in logs" :key="index" class="mb-1 break-all">
+            <span class="opacity-50 mr-1">[[ log.time ]]</span>
+            <span>[[ log.msg ]]</span>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const { createApp, ref, computed, nextTick } = Vue;
+
+    createApp({
+        // 修改 Vue 的分隔符，防止和 Jinja2 冲突
+        compilerOptions: {
+            delimiters: ['[[', ']]']
+        },
+        setup() {
+            const inputUrl = ref('');
+            const loading = ref(false);
+            const error = ref('');
+            const result = ref(null);
+            const isDark = ref(false);
+            const showHelp = ref(false);
+            const showLogs = ref(false);
+            const logs = ref([]);
+            const downloading = ref(false);
+            const downloadProgress = ref(0);
+
+            const addLog = (msg) => {
+                if (showLogs.value){
+                     {#console.log("开始记录日志");#}
+                     const time = new Date().toLocaleTimeString();
+                    logs.value.push({ time, msg });
+                    {#console.log(msg);#}
+                }
+
+            };
+
+            // 初始化暗黑模式
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                isDark.value = true;
+                document.documentElement.classList.add('dark');
+            }
+
+            const toggleTheme = (event) => {
+                const isAppearanceTransition = document.startViewTransition
+                    && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+                if (!isAppearanceTransition || !event) {
+                    isDark.value = !isDark.value;
+                    if (isDark.value) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                    return;
+                }
+
+                const x = event.clientX;
+                const y = event.clientY;
+                const endRadius = Math.hypot(
+                    Math.max(x, innerWidth - x),
+                    Math.max(y, innerHeight - y)
+                );
+
+                const transition = document.startViewTransition(async () => {
+                    isDark.value = !isDark.value;
+                    if (isDark.value) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                    await nextTick();
+                });
+
+                transition.ready.then(() => {
+                    const clipPath = [
+                        `circle(0px at ${x}px ${y}px)`,
+                        `circle(${endRadius}px at ${x}px ${y}px)`,
+                    ];
+                    document.documentElement.animate(
+                        {
+                            clipPath: clipPath,
+                        },
+                        {
+                            duration: 500,
+                            easing: "ease-in",
+                            pseudoElement: "::view-transition-new(root)",
+                        }
+                    );
+                });
+            };
+
+            const data = computed(() => {
+                return result.value ? result.value.data : null;
+            });
+
+            const hasLivePhoto = computed(() => {
+                if (!data.value || !data.value.images) return false;
+                return data.value.images.some(img => img.live_photo_url && img.live_photo_url !== "");
+            });
+
+            // 正则提取逻辑
+            const extractUrl = (text) => {
+                let regex = /http[s]?:\/\/[\w.-]+[\w\/-]*[\w.-]*\??[\w=&:\-\+\%]*[/]*/;
+                const match = text.match(regex);
+                return match ? match[0] : null;
+            };
+
+            const handleParse = async () => {
+                if (!inputUrl.value) return;
+
+                loading.value = true;
+                error.value = '';
+                result.value = null;
+
+                try {
+                    const realUrl = extractUrl(inputUrl.value);
+                    if (!realUrl) {
+                        throw new Error('未检测到有效的 http/https 链接');
+                    }
+
+                    const encodedUrl = encodeURIComponent(realUrl);
+                    // 假设这是你的本地接口地址
+                    const apiUrl = `/video/share/url/parse?url=${encodedUrl}`;
+
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) {
+                        throw new Error(`请求失败: ${response.statusText}`);
+                    }
+
+                    const json = await response.json();
+
+                    if (json.code === 200) {
+                        result.value = json;
+                    } else {
+                        throw new Error(json.msg || '解析失败，未知错误');
+                    }
+
+                } catch (err) {
+                    console.error(err);
+                    error.value = err.message || '请求发生错误，请检查接口服务是否开启';
+                } finally {
+                    loading.value = false;
+                }
+            };
+
+            const generateFileName = () => {
+                return Math.random().toString(36).substring(2, 8);
+            };
+
+            const downloadFile = async (url, filename) => {
+                if(!url) return;
+
+                // 检查并强制将http替换为https
+                if (url.startsWith('http://')) {
+                    url = url.replace('http://', 'https://');
+                    addLog(`URL已从HTTP升级到HTTPS: ${url}`);
+                }
+
+                addLog(`准备下载: ${url}`);
+
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                if (isIOS) addLog("检测到 iOS 设备");
+
+                // 检查是否是视频文件
+                const isVideo = filename && (filename.endsWith('.mp4'));
+                if (isVideo) {
+                    downloading.value = true;
+                    downloadProgress.value = 0;
+                }
+
+                try {
+                    addLog("开始 fetch 请求...");
+                    const res = await fetch(url);
+                    addLog(`Fetch 响应: ${res.status} ${res.statusText}`);
+
+                    if (!res.ok) throw new Error(`HTTP status ${res.status}`);
+
+                    // 获取内容长度
+                    const contentLength = res.headers.get('content-length');
+                    const total = contentLength ? parseInt(contentLength, 10) : 0;
+                    let loaded = 0;
+
+                    const reader = res.body.getReader();
+                    const chunks = [];
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        chunks.push(value);
+                        loaded += value.length;
+
+                        if (isVideo && total) {
+                            downloadProgress.value = Math.round((loaded / total) * 100);
+                        }
+                    }
+
+                    const blob = new Blob(chunks, { type: res.headers.get('content-type') });
+                    addLog(`Blob 获取成功: ${blob.type}, ${blob.size} bytes`);
+
+                    const blobUrl = URL.createObjectURL(blob);
+
+                    let extension = '';
+                    if (blob.type === 'image/jpeg') extension = '.jpg';
+                    else if (blob.type === 'image/png') extension = '.png';
+                    else if (blob.type === 'image/webp') extension = '.webp';
+                    else if (blob.type === 'video/mp4') extension = '.mp4';
+                    else if (blob.type === 'image/gif') extension = '.gif';
+
+                    if (filename && !filename.includes('.')) filename += extension;
+                    addLog(`文件名: ${filename}`);
+
+                    addLog(`开始点击下载`);
+                    // 创建一个临时下载链接并自动触发下载
+                    const downloadLink = document.createElement('a')
+                    downloadLink.href = blobUrl
+                    downloadLink.download = filename // 使用时间戳避免文件名冲突
+                    document.body.appendChild(downloadLink)
+                    downloadLink.click()
+                    document.body.removeChild(downloadLink)
+
+                    // 延迟清理
+                    setTimeout(() => {
+                        URL.revokeObjectURL(blobUrl);
+                    }, 1000);
+
+                } catch (e) {
+                    addLog(`下载失败: ${e.message},${e}`);
+                    {#console.warn("Download failed", e);#}
+                    if (isIOS) {
+                        addLog("iOS 跳转 fallback-创建a 标签");
+                        {#window.location.href = url;#}
+                        const a = document.createElement('a');
+                          a.href = url;
+                          a.target = '_blank';
+                          a.rel = 'noopener noreferrer'; // 安全最佳实践
+                          document.body.appendChild(a);
+                          a.click();
+                          document.body.removeChild(a);
+                    } else {
+                        addLog("新窗口打开 fallback");
+                        window.open(url, '_blank');
+                    }
+                } finally {
+                    if (isVideo) {
+                        setTimeout(() => {
+                            downloading.value = false;
+                            downloadProgress.value = 0;
+                        }, 1000);
+                    }
+                }
+            };
+
+            const downloadLivePhoto = async (imgUrl, videoUrl, index) => {
+                const baseName = `live_photo_${index}_${generateFileName()}`;
+                await downloadFile(videoUrl, baseName + '.mp4');
+            };
+
+            // 检查 URL 参数
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('showLog')) {
+                const val = urlParams.get('showLog');
+                showLogs.value = val === 'true' || val === '1';
+            }
+
+            return {
+                inputUrl,
+                loading,
+                error,
+                data,
+                isDark,
+                showHelp,
+                showLogs,
+                logs,
+                hasLivePhoto,
+                toggleTheme,
+                handleParse,
+                downloadFile,
+                downloadLivePhoto,
+                generateFileName,
+                downloading,
+                downloadProgress
+            };
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
