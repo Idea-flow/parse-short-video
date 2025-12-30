@@ -180,30 +180,9 @@ logging:
 3. 在 `VideoParseService` 中注册新的解析器
 4. 添加域名映射关系
 
-### 调试技巧
-
-```bash
-# 查看详细日志
-export LOGGING_LEVEL_COM_IDEAFLOW=DEBUG
-mvn spring-boot:run
-
-# 查看 HTTP 请求详情
-export LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB=DEBUG
-```
-
 ## 常见问题
 
-### 1. 编译错误：类文件版本错误
-
-**问题：** `错误的类文件版本 61.0, 应为 52.0`
-
-**解决：** 确保使用 Java 21 编译
-```bash
-export JAVA_HOME=$(/usr/libexec/java_home -v 21)
-mvn clean compile
-```
-
-### 2. 解析失败
+### 1. 解析失败
 
 **可能原因：**
 - 分享链接已过期
@@ -216,7 +195,7 @@ mvn clean compile
 - 尝试使用最新的分享链接
 - 更新 User-Agent 列表
 
-### 3. 视频URL无法访问
+### 2. 视频URL无法访问
 
 **原因：** 某些平台的视频 URL 有时效性或需要特定的请求头
 
@@ -235,8 +214,4 @@ mvn clean compile
 
 本项目仅供学习交流使用。
 
-## 相关项目
-
-本项目参考了以下项目：
-- [parse-video-py](https://github.com/yourusername/parse-video-py) - Python 版本的视频解析服务
 

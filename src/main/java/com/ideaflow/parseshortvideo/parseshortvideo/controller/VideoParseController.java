@@ -40,7 +40,7 @@ public class VideoParseController {
     @GetMapping("/share/url/parse")
     public ApiResponse<VideoInfo> parseShareUrl(@RequestParam String url) {
         try {
-            log.info("Parsing share URL: {}", url);
+//            log.info("Parsing share URL: {}", url);
 
             // 从文本中提取URL
             String videoShareUrl = extractUrl(url);
@@ -48,12 +48,12 @@ public class VideoParseController {
                 return ApiResponse.error(400, "无法从输入文本中提取有效URL");
             }
 
-            log.info("Extracted URL: {}", videoShareUrl);
+//            log.info("Extracted URL: {}", videoShareUrl);
 
             // 解析视频信息
             VideoInfo videoInfo = videoParseService.parseShareUrl(videoShareUrl);
 
-            log.info("Successfully parsed video: {}", videoInfo.getTitle());
+//            log.info("Successfully parsed video: {}", videoInfo.getTitle());
 
             return ApiResponse.success(videoInfo);
         } catch (Exception e) {
@@ -74,11 +74,11 @@ public class VideoParseController {
             @RequestParam VideoSource source,
             @RequestParam String videoId) {
         try {
-            log.info("Parsing video ID: {} from source: {}", videoId, source);
+//            log.info("Parsing video ID: {} from source: {}", videoId, source);
 
             VideoInfo videoInfo = videoParseService.parseVideoId(source, videoId);
 
-            log.info("Successfully parsed video: {}", videoInfo.getTitle());
+//            log.info("Successfully parsed video: {}", videoInfo.getTitle());
 
             return ApiResponse.success(videoInfo);
         } catch (Exception e) {

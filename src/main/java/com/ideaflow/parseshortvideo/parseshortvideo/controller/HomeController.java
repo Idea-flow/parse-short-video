@@ -19,22 +19,5 @@ public class HomeController {
         return "index";
     }
 
-    /**
-     * Thymeleaf 测试页面
-     */
-    @GetMapping("/test")
-    public String test(Model model) {
-        model.addAttribute("title", "Thymeleaf 测试页面");
-        return "test";
-    }
-
-    /**
-     * Vue 调试页面
-     */
-    @GetMapping("/vue-debug")
-    public String vueDebug(Model model) {
-        model.addAttribute("title", "Vue 调试测试");
-        return "vue-debug";
-    }
 }
 

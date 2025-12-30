@@ -464,6 +464,16 @@
                                 json.data.video_url = json.data.videoUrl;
                                 delete json.data.videoUrl;
                             }
+                            // 转换 images 数组中的字段名
+                            if (json.data.images && Array.isArray(json.data.images)) {
+                                json.data.images = json.data.images.map(img => {
+                                    if (img.livePhotoUrl !== undefined) {
+                                        img.live_photo_url = img.livePhotoUrl;
+                                        delete img.livePhotoUrl;
+                                    }
+                                    return img;
+                                });
+                            }
                         }
                         // console.log("接口解析结果:"+JSON.stringify(json))
                         // addLog("接口解析结果:"+JSON.stringify(json))
@@ -596,7 +606,7 @@
             if (urlParams.has('showLog')) {
                 const val = urlParams.get('showLog');
                 showLogs.value = val === 'true' || val === '1';
-                console.log(`showLogs: ${showLogs.value}`)
+                console.log(`showLogs23: ${showLogs.value}`)
             }
 
             return {
