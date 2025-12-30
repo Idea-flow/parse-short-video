@@ -22,7 +22,7 @@ NC='\033[0m' # No Color
 IMAGE_NAME="parse-short-video"
 IMAGE_TAG="test"
 CONTAINER_NAME="parse-video-test"
-PORT="8080"
+PORT="40202"
 
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}Docker 镜像本地构建和测试${NC}"
@@ -92,7 +92,7 @@ docker images | grep $IMAGE_NAME
 echo -e "\n${YELLOW}[5/6] 启动容器...${NC}"
 docker run -d \
   --name $CONTAINER_NAME \
-  -p $PORT:8080 \
+  -p $PORT:40202 \
   $IMAGE_NAME:$IMAGE_TAG
 
 # 等待容器启动

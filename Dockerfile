@@ -27,6 +27,10 @@ WORKDIR /app
 # 添加非 root 用户以提高安全性
 RUN addgroup -S spring && adduser -S spring -G spring
 
+# 创建日志目录并赋权
+RUN mkdir -p /app/logs && chown spring:spring /app/logs
+
+
 # 从构建阶段复制 JAR 文件
 COPY --from=builder /app/target/*.jar app.jar
 
@@ -37,7 +41,7 @@ RUN chown spring:spring app.jar
 USER spring:spring
 
 # 暴露应用端口（根据 application.yml 中的配置）
-EXPOSE 8080
+EXPOSE 40202
 
 # 设置 JVM 参数
 ENV JAVA_OPTS="-Xms256m -Xmx512m"
