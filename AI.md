@@ -21,3 +21,13 @@
 
 
 
+
+
+# github镜像打包
+
+参考python的/Users/wangpenglong/projects/java/parse-short-video/parse-video-py-main-my/.github/workflows/docker-my.yml
+1. 创建.github/workflows/docker-my.yml文件 完成springboot 这个项目的docker镜像打包和推送到dockerhub
+2. 镜像需要支持linux平台 mac系统
+3. env:
+   image_name_build: biliw
+   IMAGE_NAME: parse-short-video:latest

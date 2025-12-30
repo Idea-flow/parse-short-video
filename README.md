@@ -61,6 +61,89 @@ java -jar target/parse-short-video-0.0.1-SNAPSHOT.jar
 - 前端页面: http://localhost:40200
 - API 文档: 见下方
 
+## Docker 部署
+
+### 方式1：使用预构建镜像（推荐）
+
+```bash
+# 从 Docker Hub 拉取最新镜像
+docker pull biliw/parse-short-video:latest
+
+# 运行容器
+docker run -d \
+  --name parse-video \
+  -p 40200:8080 \
+  --restart unless-stopped \
+  biliw/parse-short-video:latest
+
+# 查看日志
+docker logs -f parse-video
+```
+
+### 方式2：本地构建镜像
+
+```bash
+# 构建 Docker 镜像
+docker build -t parse-short-video:latest .
+
+# 运行容器
+docker run -d \
+  --name parse-video \
+  -p 40200:8080 \
+  parse-short-video:latest
+```
+
+### 方式3：使用测试脚本
+
+```bash
+# 运行自动化测试脚本（构建 + 测试）
+./docker-test.sh
+```
+
+### Docker Compose 部署
+
+创建 `docker-compose.yml`：
+
+```yaml
+version: '3.8'
+
+services:
+  parse-video:
+    image: biliw/parse-short-video:latest
+    container_name: parse-video
+    ports:
+      - "40200:8080"
+    restart: unless-stopped
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx512m
+```
+
+运行：
+
+```bash
+docker-compose up -d
+```
+
+**详细的 Docker 部署指南请参考：** [DOCKER_GUIDE.md](DOCKER_GUIDE.md)
+
+## CI/CD 自动构建
+
+本项目使用 GitHub Actions 自动构建和推送 Docker 镜像到 Docker Hub。
+
+### 配置步骤：
+
+1. Fork 本项目到您的 GitHub 账号
+2. 在 GitHub 仓库设置中添加 Secrets：
+   - `DOCKER_USERNAME`: 您的 Docker Hub 用户名
+   - `DOCKER_PASSWORD`: 您的 Docker Hub 密码或 Access Token
+3. 推送代码到 main 分支即可触发自动构建
+
+### 支持的平台：
+- linux/amd64（Intel/AMD 服务器、Intel Mac）
+- linux/arm64（ARM 服务器、Apple Silicon Mac M1/M2/M3）
+
+工作流配置文件：`.github/workflows/docker-my.yml`
+
 ## API 接口
 
 ### 1. 解析分享链接

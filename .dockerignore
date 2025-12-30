@@ -1,0 +1,46 @@
+# Git 相关文件
+.git
+.gitignore
+.gitattributes
+
+# GitHub Actions
+.github
+
+# IDE 配置文件
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws
+
+# Maven 构建目录
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 文档和说明文件
+README.md
+AI.md
+*.md
+!src/**/*.md
+
+# Python 项目文件（参考项目）
+parse-video-py-main-my/
+
+# 其他
+提示词.md
+

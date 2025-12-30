@@ -1,0 +1,91 @@
+# GitHub Actions 工作流：构建并推送 Docker 镜像到 Docker Hub
+# 这个工作流会在代码推送到 main 分支或创建 Pull Request 时触发
+
+name: Build and Push Docker Image
+
+# 触发条件：当代码推送到 main 分支或创建针对 main 分支的 PR 时
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# 环境变量配置
+env:
+  # Docker Hub 用户名（用于构建镜像名称）
+  image_name_build: biliw
+  # 完整的镜像名称和标签
+  IMAGE_NAME: parse-short-video:latest
+
+jobs:
+  build:
+    name: Build and Push Docker Image
+    # 运行在 Ubuntu 最新版本的虚拟机上
+    runs-on: ubuntu-latest
+
+    steps:
+      # 步骤1：检出代码
+      # 从 GitHub 仓库克隆代码到工作目录
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 步骤2：设置 Java 环境
+      # 安装 Java 21（与项目 pom.xml 中配置的版本一致）
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'  # Eclipse Temurin (以前的 AdoptOpenJDK)
+          cache: maven  # 缓存 Maven 依赖以加快构建速度
+
+      # 步骤3：登录到 Docker Hub
+      # 使用 GitHub Secrets 中存储的用户名和密码
+      # 需要在 GitHub 仓库设置中配置 DOCKER_USERNAME 和 DOCKER_PASSWORD
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 步骤4：设置 Docker Buildx
+      # Buildx 是 Docker 的扩展构建工具，支持多平台构建
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 步骤5：构建并推送 Docker 镜像
+      # 支持多平台构建（Linux AMD64 和 ARM64，macOS）
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          # 构建上下文路径（当前目录）
+          context: .
+          # Dockerfile 路径
+          file: Dockerfile
+          # 是否推送到 Docker Hub（只有在 push 事件时才推送，PR 时不推送）
+          push: ${{ github.event_name == 'push' }}
+          # 镜像标签（格式：用户名/镜像名:标签）
+          tags: |
+            ${{ env.image_name_build }}/${{ env.IMAGE_NAME }}
+            ${{ env.image_name_build }}/parse-short-video:${{ github.sha }}
+          # 支持的平台列表
+          # linux/amd64: 适用于大多数 Linux 服务器和 Intel Mac
+          # linux/arm64: 适用于 ARM 架构服务器和 Apple Silicon Mac (M1/M2/M3)
+          platforms: |
+            linux/amd64
+            linux/arm64
+          # 缓存配置，加速后续构建
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # 步骤6：输出镜像信息
+      # 显示构建完成的镜像名称，方便后续使用
+      - name: Image digest
+        run: |
+          echo "✅ Docker 镜像构建成功！"
+          echo "📦 镜像名称: ${{ env.image_name_build }}/${{ env.IMAGE_NAME }}"
+          echo "🏷️  镜像标签: ${{ github.sha }}"
+          echo ""
+          echo "🚀 使用以下命令运行镜像："
+          echo "docker pull ${{ env.image_name_build }}/${{ env.IMAGE_NAME }}"
+          echo "docker run -p 8080:8080 ${{ env.image_name_build }}/${{ env.IMAGE_NAME }}"
+
