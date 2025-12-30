@@ -1,0 +1,15 @@
+server:
+  port: 40200
+
+spring:
+  application:
+    name: parse-short-video
+
+## 日志配置
+#logging:
+#  level:
+#    com.ideaflow.springboot.web: DEBUG
+#    org.springframework: WARN
+#  pattern:
+#    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+#    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
