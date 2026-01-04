@@ -89,5 +89,5 @@ jobs:
           echo ""
           echo "🚀 使用以下命令运行镜像："
           echo "docker pull ${{ env.image_name_build }}/${{ env.IMAGE_NAME }}"
-          echo "docker run -p 8080:8080 ${{ env.image_name_build }}/${{ env.IMAGE_NAME }}"
+          echo "docker run -p 40202:40202 ${{ env.image_name_build }}/${{ env.IMAGE_NAME }}"
 
