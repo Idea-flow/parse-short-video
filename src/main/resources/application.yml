@@ -4,12 +4,17 @@ server:
 spring:
   application:
     name: parse-short-video
+  profiles:
+    active: local
   thymeleaf:
     cache: false
     prefix: classpath:/templates/
     suffix: .html
     encoding: UTF-8
     mode: HTML
+  threads:
+    virtual:
+      enabled: true
 
 # 日志配置
 logging:
