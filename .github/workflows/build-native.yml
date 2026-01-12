@@ -1,7 +1,60 @@
-name: build-native.yml
+name: Build and Push Native Image
 on:
   push:
-    branches: [ main-graalvm ]
+    branches: [ "main-graalvm" ]
+  workflow_dispatch: # 允许手动触发
+
+env:
+  IMAGE_REPO: biliw/springboot4-graalvm # 基础镜像路径（可能含大写，先标准化）
+  IMAGE_TAG: 1.0.0 # 使用提交哈希作为不可变标签
+  JAVA_VERSION: '25' # GraalVM JDK 版本
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository # 拉取代码
+        uses: actions/checkout@v4
 
+      - name: Set up GraalVM # 安装 GraalVM，提供 native-image
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'graalvm'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache Maven repository # 加速依赖下载
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-
+
+      - name: Normalize image name to lowercase # Docker 要求仓库/镜像名小写
+        run: |
+          IMAGE_NAME_NORMALIZED=$(echo "${IMAGE_REPO}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._\/:-]/-/g')
+          echo "IMAGE_NAME=${IMAGE_NAME_NORMALIZED}" >> "$GITHUB_ENV"
+
+      - name: Build native image with Spring Boot # 构建 OCI 镜像 (GraalVM native)
+        env:
+          BP_JVM_VERSION: 25 # Spring Boot 4 需要 NIK/GraalVM 25+，避免 buildpack 报版本过低
+        run: ./mvnw -Pnative spring-boot:build-image -DskipTests -Dspring-boot.build-image.imageName=${IMAGE_NAME}:${IMAGE_TAG}
+
+      - name: Tag image as latest # 额外打 latest 标签
+        run: docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
+
+      - name: Log in to Docker Hub # 使用仓库凭证登录
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push image to Docker Hub # 推送唯一标签 + latest
+        run: |
+          docker push ${IMAGE_NAME}:${IMAGE_TAG}
+          docker push ${IMAGE_NAME}:latest

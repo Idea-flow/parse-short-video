@@ -57,3 +57,23 @@ docker push biliw/parse-short-video-graalvm:0.0.1-SNAPSHOT
 
 
 docker pull biliw/parse-short-video-graalvm:0.0.1-SNAPSHOT
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+
+./mvnw spring-boot:build-image \
+-Pnative \
+-Dspring-boot.build-image.imageName=yourname/yourapp:multi \
+-Dspring-boot.build-image.publish=true
+
