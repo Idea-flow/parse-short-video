@@ -1,0 +1,7 @@
+name: build-native.yml
+on:
+  push:
+    branches: [ main-graalvm ]
+
+jobs:
+

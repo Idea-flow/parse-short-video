@@ -1,2 +1,2 @@
-logging:
-  config: classpath:logback-springboot4.xml #mvn dependency:tree | grep logback 1.4.14 之上的版本
+#logging:
+#  config: classpath:logback-springboot4.xml #mvn dependency:tree | grep logback 1.4.14 之上的版本
