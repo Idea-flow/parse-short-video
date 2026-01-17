@@ -31,3 +31,14 @@
 3. env:
    image_name_build: biliw
    IMAGE_NAME: parse-short-video:latest
+
+
+
+
+
+# 创建一个代理接口
+   /proxy?url=xxx
+
+创建一个代理接口 /proxy?url=xxx
+这个url可能是图片 或者 视频,  是/share/url/parse 接口解析的各大媒体的图片,视频地址,写一个代理接口 来下载这些内容
+

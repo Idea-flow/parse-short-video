@@ -1,75 +1,42 @@
-package com.ideaflow.parseshortvideo.parseshortvideo;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
-
-@SpringBootTest
-class ParseShortVideoApplicationTests {
-
-    private final RestClient restClient = RestClient.create();
-
-    @Test
-    void contextLoads() {
-
-    }
-
-    @Test
-    void testRestClientGet() {
-//        // GET 请求示例
-//        String url = "https://jsonplaceholder.typicode.com/posts/1";
+//package com.ideaflow.parseshortvideo.parseshortvideo;// java
+//import org.junit.jupiter.api.Test;
+//import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.beans.factory.annotation.Qualifier;
+//import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.core.env.Environment;
+//import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+//import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+//import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+//import org.springframework.core.task.AsyncTaskExecutor;
 //
-//        // 简单的 GET 请求
-//        String response = restClient.get()
-//            .uri(url)
-//            .retrieve()
-//            .body(String.class);
+//import java.util.concurrent.TimeUnit;
 //
-//        System.out.println("GET Response: " + response);
+//import static org.junit.jupiter.api.Assertions.*;
+//import static org.junit.jupiter.api.Assumptions.assumeTrue;
 //
-//        // 带参数的 GET 请求
-//        String responseWithParams = restClient.get()
-//            .uri(uriBuilder -> uriBuilder
-//                .path("https://jsonplaceholder.typicode.com/posts")
-//                .queryParam("userId", 1)
-//                .build())
-//            .retrieve()
-//            .body(String.class);
+//@SpringBootTest
+//class ParseShortVideoApplicationTests {
 //
-//        System.out.println("GET with Params Response: " + responseWithParams);
-    }
-
-    @Test
-    void testRestClientPost() {
-//        // POST 请求示例
-//        String url = "https://jsonplaceholder.typicode.com/posts";
+//    @Autowired
+//    private Environment env;
 //
-//        // 准备请求体
-//        String jsonBody = "{\n" +
-//            "  \"title\": \"foo\",\n" +
-//            "  \"body\": \"bar\",\n" +
-//            "  \"userId\": 1\n" +
-//            "}";
+//    @Qualifier("applicationTaskExecutor")
+//    @Autowired(required = false)
+//    private AsyncTaskExecutor applicationTaskExecutor;
 //
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.set("Content-Type", "application/json");
+//    @Test
+//    void virtualThreadConfigEnabled() {
+//        assertEquals("true",
+//                env.getProperty("spring.threads.virtual.enabled"),
+//                "spring.threads.virtual.enabled 未开启");
+//    }
 //
-//        HttpEntity<String> request = new HttpEntity<>(jsonBody, headers);
-//
-//        // 执行 POST 请求
-//        String response = restClient.post()
-//            .uri(url)
-//            .headers(httpHeaders -> httpHeaders.addAll(headers))
-//            .body(jsonBody)
-//            .retrieve()
-//            .body(String.class);
-//
-//        System.out.println("POST Response: " + response);
-    }
-}
+//    @Test
+//    void virtualThreadExecutorWorks() throws Exception {
+//        assumeTrue(applicationTaskExecutor != null, "未定义虚拟线程执行器 Bean");
+//        Boolean isVirtual = applicationTaskExecutor.submit(() -> Thread.currentThread().isVirtual())
+//                .get(3, TimeUnit.SECONDS);
+//        assertTrue(isVirtual, "提交任务未运行在虚拟线程上");
+//    }
+//}
