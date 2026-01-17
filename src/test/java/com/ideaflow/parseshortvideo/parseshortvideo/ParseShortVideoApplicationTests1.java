@@ -1,5 +1,9 @@
 package com.ideaflow.parseshortvideo.parseshortvideo;
 
+import com.ideaflow.parseshortvideo.parseshortvideo.model.VideoInfo;
+import com.ideaflow.parseshortvideo.parseshortvideo.parser.RedBookParser;
+import jakarta.annotation.Resource;
+import net.minidev.json.JSONUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.client.RestClient;
@@ -8,6 +12,9 @@ import org.springframework.web.client.RestClient;
 class ParseShortVideoApplicationTests1 {
 
     private final RestClient restClient = RestClient.create();
+
+    @Resource
+    RedBookParser redBookParser;
 
     @Test
     void contextLoads() {
@@ -65,5 +72,21 @@ class ParseShortVideoApplicationTests1 {
 //            .body(String.class);
 //
 //        System.out.println("POST Response: " + response);
+    }
+
+    @Test
+    void testRestClientPut() {
+        String url = "https://www.xiaohongshu.com/explore/69511d3f000000001f009e5f?app_platform=ios&app_version=9.9&share_from_user_hidden=true&xsec_source=app_share&type=normal&xsec_token=CB3-KUKZW8MuSRL-KNVoa2xI6QozLHw-dNgi6G0yLdq4M=&author_share=1&xhsshare=CopyLink&shareRedId=ODs6Njk9RT42NzUyOTgwNjdHOTc1PTc7&apptime=1768646010&share_id=6976871b1d3f434ba2a83b0263ab269c";
+
+        String  urlOr = "http://xhslink.com/o/Ay0WlBPXsx1";
+
+        try {
+            VideoInfo videoInfo = redBookParser.parseShareUrl(url);
+
+            System.out.println(videoInfo.getImages());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }

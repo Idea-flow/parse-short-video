@@ -6,6 +6,7 @@ import com.ideaflow.parseshortvideo.parseshortvideo.model.VideoInfo;
 import com.ideaflow.parseshortvideo.parseshortvideo.util.UserAgentHelper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.net.http.HttpClient;
 
 /**
  * 小红书视频解析器
@@ -27,8 +29,13 @@ public class RedBookParser extends BaseParser {
 
     @Override
     public VideoInfo parseShareUrl(String shareUrl) throws Exception {
-        // 使用Windows User-Agent
-        String html = restClient.get()
+        // 使用Windows User-Agent，并为此请求单独开启重定向
+        RestClient redirectableRestClient = restClient.mutate()
+                .requestFactory(new JdkClientHttpRequestFactory(
+                        HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build()))
+                .build();
+
+        String html = redirectableRestClient.get()
                 .uri(shareUrl)
                 .headers(httpHeaders -> getWindowsHeaders().forEach(httpHeaders::add))
                 .retrieve()
@@ -173,4 +180,3 @@ public class RedBookParser extends BaseParser {
                 .build();
     }
 }
-

@@ -58,3 +58,12 @@ jobs:
         run: |
           docker push ${IMAGE_NAME}:${IMAGE_TAG}
           docker push ${IMAGE_NAME}:latest
+
+      - name: Output image info # 步骤6：输出镜像信息，方便后续使用
+        run: |
+          echo "✅ Docker 镜像构建并推送成功！"
+          echo "📦 镜像名称: ${IMAGE_NAME}"
+          echo "🏷️  镜像标签: ${IMAGE_TAG} (已同步 latest)"
+          echo ""
+          echo "🚀 拉取镜像: docker pull ${IMAGE_NAME}:${IMAGE_TAG}"
+          echo "🚀 运行镜像: docker run -p 40203:40203 ${IMAGE_NAME}:${IMAGE_TAG}"
