@@ -3,9 +3,11 @@ package com.ideaflow.parseshortvideo.parseshortvideo.service;
 import com.ideaflow.parseshortvideo.parseshortvideo.model.VideoInfo;
 import com.ideaflow.parseshortvideo.parseshortvideo.model.VideoSource;
 import com.ideaflow.parseshortvideo.parseshortvideo.parser.BaseParser;
+import com.ideaflow.parseshortvideo.parseshortvideo.parser.DouYin2Parser;
 import com.ideaflow.parseshortvideo.parseshortvideo.parser.DouYinParser;
 import com.ideaflow.parseshortvideo.parseshortvideo.parser.RedBookParser;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -19,6 +21,8 @@ import java.util.Map;
 public class VideoParseService {
     private final DouYinParser douYinParser;
     private final RedBookParser redBookParser;
+    @Resource
+    private DouYin2Parser douYin2Parser;
 
     private final Map<VideoSource, BaseParser> parserMap = new HashMap<>();
     private final Map<String, VideoSource> domainSourceMap = new HashMap<>();
@@ -34,7 +38,7 @@ public class VideoParseService {
     @PostConstruct
     public void init() {
         // 初始化解析器映射
-        parserMap.put(VideoSource.DOUYIN, douYinParser);
+        parserMap.put(VideoSource.DOUYIN, douYin2Parser);
         parserMap.put(VideoSource.REDBOOK, redBookParser);
 
         // 初始化域名映射
