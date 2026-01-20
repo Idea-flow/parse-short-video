@@ -53,10 +53,10 @@ public class DouYin2Parser extends BaseParser {
             shareUrl = getRequestUrlByVideoId(videoId);
         } else if (APP_SHARE_DOMAIN.equals(host)) {
             // App分享链接
-//            videoId = parseAppShareUrl(shareUrl);
-            resultRedirectDataMap = fetchDataWithRedirects(shareUrl,2, null);
-
-            videoId = resultRedirectDataMap.get("typeId");
+            videoId = parseAppShareUrl(shareUrl);
+//            resultRedirectDataMap = fetchDataWithRedirects(shareUrl,2, null);
+//
+//            videoId = resultRedirectDataMap.get("typeId");
             if (videoId == null || videoId.isEmpty()) {
                 throw new IllegalArgumentException("Failed to parse video ID from app share URL");
             }
