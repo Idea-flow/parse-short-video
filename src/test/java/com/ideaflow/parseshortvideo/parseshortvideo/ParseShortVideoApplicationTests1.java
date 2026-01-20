@@ -19,7 +19,9 @@ import java.net.http.HttpClient;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -112,20 +114,27 @@ class ParseShortVideoApplicationTests1 {
     @Test
     void testDouyinNoteFetchWithCookie() throws Exception {
 //        String url = "https://www.douyin.com/note/7574825499164298539";
-        String url = "https://www.iesdouyin.com/share/slides/7335767155465588006/?from_ssr=1&video_share_track_ver=&did=MS4wLjABAAAANohL7MySrJh48nT3kizleRQlYTrp9738rFE6Qe1zaowXwldK4NsYzjB9V8kx3nio&mid=7330885970806507521&ts=1768805254&share_track_info=%7B%22link_description_type%22:%22%22%7D&region=CN&share_sign=pXO7XzUk5ng_6GxXD0y_UYEPp3Jn_krtjaa4XX8wkdQ-&tt_from=share_to&with_sec_did=1&from_aid=1128&titleType=title&utm_source=share_to&utm_medium=ios&activity_info=%7B%22social_share_time%22:%221768806282%22,%22social_author_id%22:%22255526845314510%22,%22social_share_id%22:%2296511107856_1768806282%22,%22social_share_user_id%22:%2296511107856%22%7D&timestamp=1768806282&is_slides=1&share_version=360600&ug_share_id=B2FECE107F0D4A2B9728A3DAF12F9DB3&u_code=157lg8bd4&iid=MS4wLjABAAAAvXSuPYLBvlMdk9v-z7qzBEvz_2halI8SXe5-qdgdlJDcVXVmGUFxCjItgi5itY9p&utm_campaign=client_share&app=aweme&schema_type=37";
+//        String url = "https://www.iesdouyin.com/share/slides/7335767155465588006/?from_ssr=1&video_share_track_ver=&did=MS4wLjABAAAANohL7MySrJh48nT3kizleRQlYTrp9738rFE6Qe1zaowXwldK4NsYzjB9V8kx3nio&mid=7330885970806507521&ts=1768805254&share_track_info=%7B%22link_description_type%22:%22%22%7D&region=CN&share_sign=pXO7XzUk5ng_6GxXD0y_UYEPp3Jn_krtjaa4XX8wkdQ-&tt_from=share_to&with_sec_did=1&from_aid=1128&titleType=title&utm_source=share_to&utm_medium=ios&activity_info=%7B%22social_share_time%22:%221768806282%22,%22social_author_id%22:%22255526845314510%22,%22social_share_id%22:%2296511107856_1768806282%22,%22social_share_user_id%22:%2296511107856%22%7D&timestamp=1768806282&is_slides=1&share_version=360600&ug_share_id=B2FECE107F0D4A2B9728A3DAF12F9DB3&u_code=157lg8bd4&iid=MS4wLjABAAAAvXSuPYLBvlMdk9v-z7qzBEvz_2halI8SXe5-qdgdlJDcVXVmGUFxCjItgi5itY9p&utm_campaign=client_share&app=aweme&schema_type=37";
+//        String url = "https://v.douyin.com/uvZbBZU3tXg/";
+//        String url = "https://v.douyin.com/tGrucI0IQhg";
+        String url = "https://v.douyin.com/tGrucI0IQhg"; // 纯视频-单个
 
         String response = fetchHtmlWithRedirects(url, 2, "");
 
 
-        Files.writeString(Path.of("src/test/java/com/ideaflow/parseshortvideo/parseshortvideo/test.html"), response);
-        System.out.println("Douyin note response: " + response );
+//        Files.writeString(Path.of("src/test/java/com/ideaflow/parseshortvideo/parseshortvideo/testVideo.html"), response);
+//        System.out.println("Douyin note response: " + response );
 
     }
 
     @Test
     void testDouyinNoteFetchWithCookie2() throws Exception {
 //        String url = "https://www.douyin.com/note/7574825499164298539";
-        String url = "https://www.iesdouyin.com/share/slides/7335767155465588006/?from_ssr=1&video_share_track_ver=&did=MS4wLjABAAAANohL7MySrJh48nT3kizleRQlYTrp9738rFE6Qe1zaowXwldK4NsYzjB9V8kx3nio&mid=7330885970806507521&ts=1768805254&share_track_info=%7B%22link_description_type%22:%22%22%7D&region=CN&share_sign=pXO7XzUk5ng_6GxXD0y_UYEPp3Jn_krtjaa4XX8wkdQ-&tt_from=share_to&with_sec_did=1&from_aid=1128&titleType=title&utm_source=share_to&utm_medium=ios&activity_info=%7B%22social_share_time%22:%221768806282%22,%22social_author_id%22:%22255526845314510%22,%22social_share_id%22:%2296511107856_1768806282%22,%22social_share_user_id%22:%2296511107856%22%7D&timestamp=1768806282&is_slides=1&share_version=360600&ug_share_id=B2FECE107F0D4A2B9728A3DAF12F9DB3&u_code=157lg8bd4&iid=MS4wLjABAAAAvXSuPYLBvlMdk9v-z7qzBEvz_2halI8SXe5-qdgdlJDcVXVmGUFxCjItgi5itY9p&utm_campaign=client_share&app=aweme&schema_type=37";
+//        String url = "https://www.iesdouyin.com/share/slides/7335767155465588006/?from_ssr=1&video_share_track_ver=&did=MS4wLjABAAAANohL7MySrJh48nT3kizleRQlYTrp9738rFE6Qe1zaowXwldK4NsYzjB9V8kx3nio&mid=7330885970806507521&ts=1768805254&share_track_info=%7B%22link_description_type%22:%22%22%7D&region=CN&share_sign=pXO7XzUk5ng_6GxXD0y_UYEPp3Jn_krtjaa4XX8wkdQ-&tt_from=share_to&with_sec_did=1&from_aid=1128&titleType=title&utm_source=share_to&utm_medium=ios&activity_info=%7B%22social_share_time%22:%221768806282%22,%22social_author_id%22:%22255526845314510%22,%22social_share_id%22:%2296511107856_1768806282%22,%22social_share_user_id%22:%2296511107856%22%7D&timestamp=1768806282&is_slides=1&share_version=360600&ug_share_id=B2FECE107F0D4A2B9728A3DAF12F9DB3&u_code=157lg8bd4&iid=MS4wLjABAAAAvXSuPYLBvlMdk9v-z7qzBEvz_2halI8SXe5-qdgdlJDcVXVmGUFxCjItgi5itY9p&utm_campaign=client_share&app=aweme&schema_type=37";
+//        String url = "https://v.douyin.com/uvZbBZU3tXg/"; 图文 + 实况
+//        String url = "https://v.douyin.com/IbEUYfVylvw"; // 图文 + 实况
+//        String url = "https://v.douyin.com/3_eHCKlzOW4/"; // 纯图文
+        String url = "https://v.douyin.com/tGrucI0IQhg"; // 纯视频-单个
 
         String response = fetchHtmlWithRedirects(url, 2, "");
 
@@ -137,7 +146,8 @@ class ParseShortVideoApplicationTests1 {
             String arrayJson = m.group(1).trim();
             try {
                 JsonNode node = mapper.readTree(arrayJson);
-                if (!node.toString().contains("\\\"awemeId\\\":\\\"7335767155465588006\\\"")) {
+
+                if (!Pattern.compile("\\\\\"awemeId\\\\\":\\\\\"(\\d+)\\\\\"").matcher(node.toString()).find()) {
                     continue;
                 }
                 matches.add(node);
@@ -160,12 +170,10 @@ class ParseShortVideoApplicationTests1 {
         // 检查first.get(1)是否为格式为"数字: []"的字符串
         if (first.get(1).isTextual()) {
             String inputStr = first.get(1).asText();
-//            System.out.println("Input string: " + inputStr);
-
             // 使用JsonArrayExtractor解析格式为"数字: []"的字符串
             JsonNode extractedArray = JsonArrayExtractor.extractJsonArray(inputStr);
             if (extractedArray != null && extractedArray.isArray()) {
-                System.out.println("Extracted JSON array:");
+//                System.out.println("Extracted JSON array:");
                 for (JsonNode jsonNode : extractedArray) {
                     if (jsonNode.has("awemeId") && jsonNode.has("aweme")) { //找到了想要的json数据
                         JsonNode awemeJsonNode = jsonNode.get("aweme");
@@ -173,9 +181,32 @@ class ParseShortVideoApplicationTests1 {
                         JsonNode imagesJsonNode = detailJsonNode.get("images");
                         for (JsonNode imageNode : imagesJsonNode) {
                             JsonNode videoNode = imageNode.get("video");
-                            String playApi = videoNode.get("playApi").toString();
-                            imagesResult.add(new ImgInfo("", playApi));
-//                            System.out.println("playApi: " + playApi);
+                            // 1. 图文的video 是空
+                            if (videoNode == null || videoNode.isNull()){ //存图文
+                                JsonNode urlListJsonNode = imageNode.get("urlList");
+                                // 检查 urlListJsonNode 是否为数组且不为空
+                                if (urlListJsonNode != null && urlListJsonNode.isArray() && urlListJsonNode.size() > 0) {
+                                    // 获取数组最后一个元素
+                                    JsonNode lastElement = urlListJsonNode.get(urlListJsonNode.size() - 1);
+                                    // 转换为字符串，使用asText()避免转义，然后解码URL中的编码字符
+                                    String lastValue = lastElement.asText();
+
+                                    imagesResult.add(new ImgInfo(lastValue,""));
+                                }
+                            }else {
+                                JsonNode videoPlayAddrNode = videoNode.get("playAddr");
+                                JsonNode cover = videoNode.get("cover");
+                                // 检查 videoPlayAddrNode 是否为数组且不为空
+                                if (videoPlayAddrNode != null && videoPlayAddrNode.isArray() && videoPlayAddrNode.size() > 0) {
+                                    // 获取数组最后一个元素
+                                    JsonNode lastElement = videoPlayAddrNode.get(videoPlayAddrNode.size() - 1);
+                                    // 转换为字符串，使用asText()避免转义，然后解码URL中的编码字符
+                                    String lastValue = lastElement.get("src").asText();
+
+                                    imagesResult.add(new ImgInfo(cover.asText(), lastValue));
+                                }
+                            }
+
 
                         }
                     }
@@ -194,47 +225,6 @@ class ParseShortVideoApplicationTests1 {
 
     }
 
-    private String fetchHtmlWithRedirects(String url, int maxRedirects, String redirectCookie) throws Exception {
-        RestClient nonRedirectClient = restClient.mutate()
-                .requestFactory(new JdkClientHttpRequestFactory(
-                        HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NEVER).build()))
-                .build();
-
-        URI currentUri = URI.create(url);
-        for (int i = 0; i <= maxRedirects; i++) {
-            int finalI = i;
-            DouYin2Parser.RedirectFetchResult result = nonRedirectClient.get()
-                    .uri(currentUri)
-                    .headers(httpHeaders -> {
-                        // 第二次及之后的请求携带指定的Cookie
-                        if (finalI > 0) {
-                            httpHeaders.add("Cookie", "__ac_nonce=06950e150003bec85b6d9; __ac_signature=_02B4Z6wo00f01OzPKuAAAIDC31rcoCq6.8Ts7y5AAFJo7f");
-                            httpHeaders.add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36");
-                            httpHeaders.add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8");
-                        }
-                    })
-                    .exchange((request, clientResponse) -> {
-                        if (clientResponse.getStatusCode().is3xxRedirection()) {
-                            String location = clientResponse.getHeaders().getFirst("Location");
-                            return new DouYin2Parser.RedirectFetchResult(null, location, true);
-                        }
-                        String body = clientResponse.bodyTo(String.class);
-                        return new DouYin2Parser.RedirectFetchResult(body, null, false);
-                    });
-
-            if (!result.isRedirect) {
-                return result.body;
-            }
-
-            if (result.location == null || result.location.isEmpty()) {
-                throw new Exception("Redirect without Location header");
-            }
-
-            currentUri = currentUri.resolve(result.location);
-        }
-
-        throw new Exception("Exceeded redirect limit: " + maxRedirects);
-    }
 
     @Test
     void testExtractPaceFPushJsonArrays() throws Exception {
@@ -288,15 +278,11 @@ class ParseShortVideoApplicationTests1 {
                                 // 获取数组最后一个元素
                                 JsonNode lastElement = videoPlayAddrNode.get(videoPlayAddrNode.size() - 1);
 
-                                // 转换为字符串
-                                String lastValue = lastElement.get("src").toString();
+                                // 转换为字符串，使用asText()避免转义，然后解码URL中的编码字符
+                                String lastValue = lastElement.get("src").asText();
 
                                 imagesResult.add(new ImgInfo(cover.asText(), lastValue));
                             }
-
-//                            String playApi = videoNode.get("playApi").toString();
-
-//                            System.out.println("playApi: " + playApi);
 
                         }
                     }
@@ -317,5 +303,68 @@ class ParseShortVideoApplicationTests1 {
 
         System.out.println(videoInfo);
 
+    }
+
+
+    private String fetchHtmlWithRedirects(String url, int maxRedirects, String redirectCookie) throws Exception {
+        Map<String,String> resultMapData = new HashMap<>();
+        resultMapData.put("htmlData",null);
+        resultMapData.put("type","0"); //0:默认 1:node 2 视频
+        resultMapData.put("typeId",""); //0 默认 1 node 2 视频
+
+        RestClient nonRedirectClient = restClient.mutate()
+                .requestFactory(new JdkClientHttpRequestFactory(
+                        HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NEVER).build()))
+                .build();
+
+        URI currentUri = URI.create(url);
+        for (int i = 0; i <= maxRedirects; i++) {
+            int finalI = i;
+            URI finalCurrentUri = currentUri;
+            DouYin2Parser.RedirectFetchResult result = nonRedirectClient.get()
+                    .uri(currentUri)
+                    .headers(httpHeaders -> {
+                        // 第二次及之后的请求携带指定的Cookie
+                        if (finalI > 0) {
+                            httpHeaders.add("Cookie", "__ac_nonce=06950e150003bec85b6d9; __ac_signature=_02B4Z6wo00f01OzPKuAAAIDC31rcoCq6.8Ts7y5AAFJo7f");
+                            httpHeaders.add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36");
+                            httpHeaders.add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8");
+                        }
+                    })
+                    .exchange((request, clientResponse) -> {
+                        if (clientResponse.getStatusCode().is3xxRedirection()) {
+                            String location = clientResponse.getHeaders().getFirst("Location");
+                            return new DouYin2Parser.RedirectFetchResult(null, location, true);
+                        }
+                        String path = finalCurrentUri.getPath();
+                        if (path != null && path.contains("/note/")){
+                            resultMapData.put("type", "1");
+                            String typeId = path.substring(path.lastIndexOf('/') + 1);
+                            resultMapData.put("typeId", typeId);
+                        }
+                        if (path != null && path.contains("/video/")){
+                            resultMapData.put("type", "2");
+                            String typeId = path.substring(path.lastIndexOf('/') + 1);
+                            resultMapData.put("typeId", typeId);
+                        }
+
+
+                        String body = clientResponse.bodyTo(String.class);
+                        return new DouYin2Parser.RedirectFetchResult(body, null, false);
+                    });
+
+            if (!result.isRedirect) {
+                resultMapData.put("htmlData",result.body);
+                return result.body;
+            }
+
+            if (result.location == null || result.location.isEmpty()) {
+                throw new Exception("Redirect without Location header");
+            }
+
+            currentUri = currentUri.resolve(result.location);
+        }
+
+        throw new Exception("Exceeded redirect limit: " + maxRedirects);
     }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ideaflow.parseshortvideo.parseshortvideo.model.ImgInfo;
 import com.ideaflow.parseshortvideo.parseshortvideo.model.VideoAuthor;
 import com.ideaflow.parseshortvideo.parseshortvideo.model.VideoInfo;
+import com.ideaflow.parseshortvideo.parseshortvideo.util.JsonArrayExtractor;
 import com.ideaflow.parseshortvideo.parseshortvideo.util.UserAgentHelper;
 import lombok.Data;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
@@ -12,12 +13,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,12 +40,47 @@ public class DouYin2Parser extends BaseParser {
 
     @Override
     public VideoInfo parseShareUrl(String shareUrl) throws Exception {
-        // 手动跟随最多两次重定向，确保多级跳转的分享链接也能获取到最终HTML
-        String html = fetchHtmlWithRedirects(shareUrl, 2, "__ac_nonce=06950e150003bec85b6d9; __ac_signature=_02B4Z6wo00f01OzPKuAAAIDC31rcoCq6.8Ts7y5AAFJo7f;");
+        URI uri = new URI(shareUrl);
+        String host = uri.getHost();
+        Map<String , String> resultRedirectDataMap = new HashMap<>();
+        String videoId;
+        if (PC_DOMAIN_1.equals(host) || PC_DOMAIN_2.equals(host)) {
+            // PC网页端链接
+            videoId = parseVideoIdFromPath(shareUrl);
+            if (videoId == null || videoId.isEmpty()) {
+                throw new IllegalArgumentException("Failed to parse video ID from PC share URL");
+            }
+            shareUrl = getRequestUrlByVideoId(videoId);
+        } else if (APP_SHARE_DOMAIN.equals(host)) {
+            // App分享链接
+//            videoId = parseAppShareUrl(shareUrl);
+            resultRedirectDataMap = fetchDataWithRedirects(shareUrl,2, null);
+
+            videoId = resultRedirectDataMap.get("typeId");
+            if (videoId == null || videoId.isEmpty()) {
+                throw new IllegalArgumentException("Failed to parse video ID from app share URL");
+            }
+            shareUrl = getRequestUrlByVideoId(videoId);
+        } else {
+            throw new IllegalArgumentException("Douyin not support this host: " + host);
+        }
+        if (Objects.equals(resultRedirectDataMap.get("type"), "1")) {
+
+            return parseNoteInfoByRedirectData(resultRedirectDataMap);
+
+        }
+
+        // 获取页面HTML
+        String html = restClient.get()
+                .uri(shareUrl)
+                .headers(httpHeaders -> getDefaultHeaders().forEach(httpHeaders::add))
+                .retrieve()
+                .body(String.class);
 
         if (html == null || html.isEmpty()) {
             throw new Exception("Failed to fetch video page HTML");
         }
+
 
         // 从HTML中提取JSON数据
         Pattern pattern = Pattern.compile("window\\._ROUTER_DATA\\s*=\\s*(.*?)</script>", Pattern.DOTALL);
@@ -64,6 +100,103 @@ public class DouYin2Parser extends BaseParser {
         }
 
         return buildVideoInfo(data);
+    }
+
+    private VideoInfo parseNoteInfoByRedirectData(Map<String, String> resultRedirectDataMap) {
+        VideoInfo videoInfo = new VideoInfo();
+        VideoAuthor author = new VideoAuthor();
+        videoInfo.setAuthor(author);
+
+        String htmlData = resultRedirectDataMap.get("htmlData");
+        Pattern p = Pattern.compile("self\\.__pace_f\\.push\\(\\s*(\\[.*?\\])\\s*\\)", Pattern.DOTALL);
+        Matcher m = p.matcher(htmlData);
+        ObjectMapper mapper = new ObjectMapper();
+        List<JsonNode> matches = new ArrayList<>();
+        while (m.find()) {
+            String arrayJson = m.group(1).trim();
+            try {
+                JsonNode node = mapper.readTree(arrayJson);
+
+                if (!Pattern.compile("\\\\\"awemeId\\\\\":\\\\\"(\\d+)\\\\\"").matcher(node.toString()).find()) {
+                    continue;
+                }
+                matches.add(node);
+            } catch (Exception ignore) {
+                // 非合法 JSON，跳过
+            }
+        }
+        if (matches.isEmpty()) {
+            System.out.println("No matching self.__pace_f.push JSON arrays found.");
+        }
+
+        JsonNode first = matches.getFirst();
+
+        List<ImgInfo> imagesResult = new ArrayList<>();
+        videoInfo.setImages(imagesResult);
+
+
+        // 检查first.get(1)是否为格式为"数字: []"的字符串
+        if (first.get(1).isTextual()) {
+            String inputStr = first.get(1).asText();
+            // 使用JsonArrayExtractor解析格式为"数字: []"的字符串
+            JsonNode extractedArray = JsonArrayExtractor.extractJsonArray(inputStr);
+            if (extractedArray != null && extractedArray.isArray()) {
+//                System.out.println("Extracted JSON array:");
+                for (JsonNode jsonNode : extractedArray) {
+                    if (jsonNode.has("awemeId") && jsonNode.has("aweme")) { //找到了想要的json数据
+                        JsonNode awemeJsonNode = jsonNode.get("aweme");
+                        JsonNode detailJsonNode = awemeJsonNode.get("detail");
+                        JsonNode imagesJsonNode = detailJsonNode.get("images");
+                        JsonNode authorInfosonNode = detailJsonNode.get("authorInfo");
+                        if (imagesJsonNode != null){
+                            author.setAvatar(authorInfosonNode.get("avatarUri").asText());
+                            author.setName(authorInfosonNode.get("nickname").asText());
+                            author.setUid(authorInfosonNode.get("uid").asText());
+                        }
+
+                        for (JsonNode imageNode : imagesJsonNode) {
+                            JsonNode videoNode = imageNode.get("video");
+                            // 1. 图文的video 是空
+                            if (videoNode == null || videoNode.isNull()){ //存图文
+                                JsonNode urlListJsonNode = imageNode.get("urlList");
+                                // 检查 urlListJsonNode 是否为数组且不为空
+                                if (urlListJsonNode != null && urlListJsonNode.isArray() && urlListJsonNode.size() > 0) {
+                                    // 获取数组最后一个元素
+                                    JsonNode lastElement = urlListJsonNode.get(urlListJsonNode.size() - 1);
+                                    // 转换为字符串，使用asText()避免转义，然后解码URL中的编码字符
+                                    String lastValue = lastElement.asText();
+
+                                    imagesResult.add(new ImgInfo(lastValue,""));
+                                }
+                            }else {
+                                JsonNode videoPlayAddrNode = videoNode.get("playAddr");
+                                JsonNode cover = videoNode.get("cover");
+                                // 检查 videoPlayAddrNode 是否为数组且不为空
+                                if (videoPlayAddrNode != null && videoPlayAddrNode.isArray() && videoPlayAddrNode.size() > 0) {
+                                    // 获取数组最后一个元素
+                                    JsonNode lastElement = videoPlayAddrNode.get(videoPlayAddrNode.size() - 1);
+                                    // 转换为字符串，使用asText()避免转义，然后解码URL中的编码字符
+                                    String lastValue = lastElement.get("src").asText();
+
+                                    imagesResult.add(new ImgInfo(cover.asText(), lastValue));
+                                }
+                            }
+
+
+                        }
+                    }
+                }
+            } else {
+                System.out.println("Failed to extract JSON array or extracted content is not an array");
+                // 如果不是预期格式，仍然按原有逻辑处理
+                for (JsonNode jsonNode : first.get(1)) {
+                    System.out.println(jsonNode.get("awemeId").asText());
+                }
+            }
+        }
+
+        return  videoInfo;
+
     }
 
     @Override
@@ -199,9 +332,11 @@ public class DouYin2Parser extends BaseParser {
                     .headers(httpHeaders -> {
                         getDefaultHeaders().forEach(httpHeaders::add);
                         // 第二次及之后的请求携带指定的Cookie
-                        if (redirectCookie != null && !redirectCookie.isEmpty() && finalI > 0) {
-                            httpHeaders.add("Cookie", redirectCookie);
-                            httpHeaders.add("Host", "www.iesdouyin.com");
+                        // 第二次及之后的请求携带指定的Cookie
+                        if (finalI > 0) {
+                            httpHeaders.add("Cookie", "__ac_nonce=06950e150003bec85b6d9; __ac_signature=_02B4Z6wo00f01OzPKuAAAIDC31rcoCq6.8Ts7y5AAFJo7f");
+                            httpHeaders.add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36");
+                            httpHeaders.add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8");
                         }
                     })
                     .exchange((request, clientResponse) -> {
@@ -215,6 +350,71 @@ public class DouYin2Parser extends BaseParser {
 
             if (!result.isRedirect) {
                 return result.body;
+            }
+
+            if (result.location == null || result.location.isEmpty()) {
+                throw new Exception("Redirect without Location header");
+            }
+
+            currentUri = currentUri.resolve(result.location);
+        }
+
+        throw new Exception("Exceeded redirect limit: " + maxRedirects);
+    }
+
+    /**
+     * 获取视频页面HTML，手动跟随最多maxRedirects次重定向
+     */
+    private Map<String,String> fetchDataWithRedirects(String url, int maxRedirects, String redirectCookie) throws Exception {
+        Map<String,String> resultMapData = new HashMap<>();
+        resultMapData.put("htmlData",null);
+        resultMapData.put("type","0"); //0:默认 1:node 2 视频
+        resultMapData.put("typeId",""); //0 默认 1 node 2 视频
+
+        RestClient nonRedirectClient = restClient.mutate()
+                .requestFactory(new JdkClientHttpRequestFactory(
+                        HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NEVER).build()))
+                .build();
+
+        URI currentUri = URI.create(url);
+        for (int i = 0; i <= maxRedirects; i++) {
+            int finalI = i;
+            URI finalCurrentUri = currentUri;
+            DouYin2Parser.RedirectFetchResult result = nonRedirectClient.get()
+                    .uri(currentUri)
+                    .headers(httpHeaders -> {
+                        // 第二次及之后的请求携带指定的Cookie
+                        if (finalI > 0) {
+                            httpHeaders.add("Cookie", "__ac_nonce=06950e150003bec85b6d9; __ac_signature=_02B4Z6wo00f01OzPKuAAAIDC31rcoCq6.8Ts7y5AAFJo7f");
+                            httpHeaders.add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36");
+                            httpHeaders.add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8");
+                        }
+                    })
+                    .exchange((request, clientResponse) -> {
+                        if (clientResponse.getStatusCode().is3xxRedirection()) {
+                            String location = clientResponse.getHeaders().getFirst("Location");
+                            return new DouYin2Parser.RedirectFetchResult(null, location, true);
+                        }
+                        String path = finalCurrentUri.getPath();
+                        if (path != null && path.contains("/note/")){
+                            resultMapData.put("type", "1");
+                            String typeId = path.substring(path.lastIndexOf('/') + 1);
+                            resultMapData.put("typeId", typeId);
+                        }
+                        if (path != null && path.contains("/video/")){
+                            resultMapData.put("type", "2");
+                            String typeId = path.substring(path.lastIndexOf('/') + 1);
+                            resultMapData.put("typeId", typeId);
+                        }
+
+
+                        String body = clientResponse.bodyTo(String.class);
+                        return new DouYin2Parser.RedirectFetchResult(body, null, false);
+                    });
+
+            if (!result.isRedirect) {
+                resultMapData.put("htmlData",result.body);
+                return resultMapData;
             }
 
             if (result.location == null || result.location.isEmpty()) {
